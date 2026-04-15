@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import chromium from "@sparticuz/chromium";
-import { chromium as playwright } from "playwright-core";
+
+export const runtime = "nodejs";
 
 type CartItem = {
   name: string;
@@ -50,6 +50,12 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const chromiumModule = await import("@sparticuz/chromium");
+    const playwrightModule = await import("playwright-core");
+
+    const chromium = chromiumModule.default;
+    const playwright = playwrightModule.chromium;
 
     const browser = await playwright.launch({
       args: chromium.args,
