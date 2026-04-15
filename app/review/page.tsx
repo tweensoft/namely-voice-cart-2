@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import type { MatchResult } from "@/lib/types";
 
 export default function ReviewPage() {
@@ -49,25 +49,32 @@ export default function ReviewPage() {
 
       const raw = await response.text();
 
-      let result: any = null;
+      let result: unknown = null;
       try {
         result = raw ? JSON.parse(raw) : null;
       } catch {
         result = null;
       }
 
+      const parsed =
+        result && typeof result === "object"
+          ? (result as {
+              error?: string;
+              message?: string;
+              checkoutUrl?: string;
+            })
+          : null;
+
       if (!response.ok) {
         throw new Error(
-          result?.error ||
-            raw ||
-            `Automation mislykkedes (${response.status})`
+          parsed?.error || raw || `Automation mislykkedes (${response.status})`
         );
       }
 
-      setMessage(result?.message || "Kurv-forløb startet.");
+      setMessage(parsed?.message || "Kurv-forløb startet.");
 
-      if (result?.checkoutUrl) {
-        window.open(result.checkoutUrl, "_blank", "noopener,noreferrer");
+      if (parsed?.checkoutUrl) {
+        window.open(parsed.checkoutUrl, "_blank", "noopener,noreferrer");
       }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Ukendt fejl");
@@ -216,13 +223,13 @@ export default function ReviewPage() {
   );
 }
 
-const inputStyle: React.CSSProperties = {
+const inputStyle: CSSProperties = {
   border: "1px solid #cbd5e1",
   borderRadius: 16,
   padding: "12px 14px",
 };
 
-const buttonPrimary: React.CSSProperties = {
+const buttonPrimary: CSSProperties = {
   border: 0,
   borderRadius: 16,
   padding: "12px 16px",
@@ -231,7 +238,7 @@ const buttonPrimary: React.CSSProperties = {
   cursor: "pointer",
 };
 
-const buttonLink: React.CSSProperties = {
+const buttonLink: CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
